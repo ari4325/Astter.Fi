@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Astter.Fi</title>
+
+    <meta charset="utf-8" />
+    <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="" />
+
+    <!-- Css -->
+    <link rel="stylesheet" href="./css/style.css" />
+
+    <!-- Dark Mode JS -->
+    <script src="./js/darkMode.bundle.js"></script>
+
+    <!-- Favicons -->
+    <link rel="shortcut icon" href="img/favicon.png" />
+  </head>
+ <style>
+
+           html{
+            scroll-behavior: smooth;
+           }
+
+    ::-webkit-scrollbar{
+            width: 8px;
+            background-color: black;
+        }
+
+        ::-webkit-scrollbar-thumb{
+            background-color: #25caa3;
+            box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        }
+
+         ::-webkit-scrollbar-track{
+            background-color: white;
+            box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        }
+
+
+    </style>
+
+  <body
+    class="dark:bg-jacarta-900 font-body text-jacarta-500 overflow-x-hidden"
+    itemscope
+    itemtype="http://schema.org/WebPage"
+  >
+   
+
+    <main>
+      <!-- Hero -->
+      <section class="relative pb-10 pt-20 md:pt-32 lg:h-[88vh]" style="margin-top: -3%;">
+        <picture class="pointer-events-none absolute inset-x-0 top-0 -z-10 dark:hidden">
+          <img src="img/gradient.jpg" alt="gradient" />
+        </picture>
+        <picture class="pointer-events-none absolute inset-x-0 top-0 -z-10 hidden dark:block">
+          <img src="img/gradient_dark.jpg" alt="gradient dark" />
+        </picture>
+
+        <div class="container h-full">
+          <div class="grid h-full items-center gap-4 md:grid-cols-12">
+            <div
+              class="col-span-6 flex h-full flex-col items-center justify-center py-10 md:items-start md:py-20 xl:col-span-4"
+            >
+            <img src="img/logo_white.png" style="margin-top:-20%;">
+              <h3
+                class="text-jacarta-300 font-display mb-5 text-center text-5xl dark:text-white md:text-left lg:text-6xl xl:text-7xl" style="margin-top: 5%;"
+              >
+                Buy Now, Pay Later.
+              </h3>
+              
+              <div class="flex space-x-4" style="margin-top: 1%;">
+                <a
+                  href="create.html"
+                  class="bg-accent shadow-accent-volume hover:bg-accent-dark w-36 rounded-full py-3 px-8 text-center font-semibold text-white transition-all"
+                >
+                  Learn
+                </a>
+                <a
+                  href="dashboard.html"
+                  class="text-accent shadow-white-volume hover:bg-accent-dark hover:shadow-accent-volume w-36 rounded-full bg-white py-3 px-8 text-center font-semibold transition-all hover:text-white"
+                >
+                  Use
+                </a>
+              </div>
+            </div>
+
+            <!-- Hero image -->
+            <div class="col-span-6 xl:col-span-8" style="margin-top:-7%;">
+              <div class="relative text-center md:pl-8 md:text-right">
+                <svg
+                  viewbox="0 0 200 200"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="mt-8 inline-block w-72 rotate-[8deg] sm:w-full lg:w-[24rem] xl:w-[35rem]"
+                >
+                  <defs>
+                    <clipPath id="clipping" clipPathUnits="userSpaceOnUse">
+                      <path
+                        d="
+                    M 0, 100
+                    C 0, 17.000000000000004 17.000000000000004, 0 100, 0
+                    S 200, 17.000000000000004 200, 100
+                        183, 200 100, 200
+                        0, 183 0, 100
+                "
+                        fill="#9446ED"
+                      ></path>
+                    </clipPath>
+                  </defs>
+                  <g clip-path="url(#clipping)">
+                    <!-- Bg image -->
+                    <image href="img/hero/hero.png" width="200" height="200" clip-path="url(#clipping)" />
+                  </g>
+                </svg>
+                <img src="img/hero/3D_elements.png" alt="" class="animate-fly absolute top-0 md:-right-[10%]" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- end hero -->
+
+     
+
+
+    
+
+      <!-- Process / Newsletter -->
+      <section class="dark:bg-jacarta-500 relative py-24" style="margin-top: 5%">
+        <picture class="pointer-events-none absolute inset-0 -z-10 dark:hidden">
+          <img src="img/gradient_light.jpg" alt="gradient" class="h-full" />
+        </picture>
+        <div class="container">
+          <h2 class="font-display text-jacarta-700 mb-16 text-center text-3xl dark:text-white">
+            How it works
+          </h2>
+          <div class="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
+            <div class="text-center">
+              <div class="mb-6 inline-flex rounded-full bg-[#CDBCFF] p-3">
+                <div class="bg-accent inline-flex h-12 w-12 items-center justify-center rounded-full">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    class="h-5 w-5 fill-white"
+                  >
+                    <path fill="none" d="M0 0h24v24H0z" />
+                    <path
+                      d="M22 6h-7a6 6 0 1 0 0 12h7v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v2zm-7 2h8v8h-8a4 4 0 1 1 0-8zm0 3v2h3v-2h-3z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h3 class="font-display text-jacarta-700 mb-4 text-lg dark:text-white">1. Adding funds</h3>
+              <p class="dark:text-jacarta-300">
+                Once you've set up your wallet, you can add Matic as collateral and get a USDT spending limit.
+              </p>
+            </div>
+            <div class="text-center">
+              <div class="mb-6 inline-flex rounded-full bg-[#C4F2E3] p-3">
+                <div class="bg-green inline-flex h-12 w-12 items-center justify-center rounded-full">
+                  <img src="img/buy.png">
+                </div>
+              </div>
+              <h3 class="font-display text-jacarta-700 mb-4 text-lg dark:text-white">2. Buying</h3>
+              <p class="dark:text-jacarta-300">
+                You can buy anything you want from any web3 platform (which uses the Astter.fi gateway) without paying at that time as long it is within your spending limit.
+              </p>
+            </div>
+            <div class="text-center">
+              <div class="mb-6 inline-flex rounded-full bg-[#CDDFFB] p-3">
+                <div class="bg-blue inline-flex h-12 w-12 items-center justify-center rounded-full">
+                  <img src="img/payment.png">
+                </div>
+              </div>
+              <h3 class="font-display text-jacarta-700 mb-4 text-lg dark:text-white">3. Paying in 3 parts</h3>
+              <p class="dark:text-jacarta-300">
+                You pay the total amount in 3 months using USDT at 0% interest and your collateral keeps increasing in value (if MATIC's value goes up ofcourse)  
+              </p>
+            </div>
+            <div class="text-center">
+              <div class="mb-6 inline-flex rounded-full bg-[#FFD0D0] p-3">
+                <div class="bg-red inline-flex h-12 w-12 items-center justify-center rounded-full">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    class="h-5 w-5 fill-white"
+                  >
+                    <path fill="none" d="M0 0h24v24H0z" />
+                    <path
+                      d="M10.9 2.1l9.899 1.415 1.414 9.9-9.192 9.192a1 1 0 0 1-1.414 0l-9.9-9.9a1 1 0 0 1 0-1.414L10.9 2.1zm2.828 8.486a2 2 0 1 0 2.828-2.829 2 2 0 0 0-2.828 2.829z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h3 class="font-display text-jacarta-700 mb-4 text-lg dark:text-white">4. Withdrawal</h3>
+              <p class="dark:text-jacarta-300">
+                You can withdraw your collateral anytime when it is not locked in for a particular transaction.
+              </p>
+            </div>
+          </div>
+
+        
+          
+        </div>
+      </section>
+      <!-- end process / newsletter -->
+    </main>
+
+   
+
+    <!-- JS Scripts -->
+    <script src="./js/app.bundle.js"></script>
+  </body>
+</html>
