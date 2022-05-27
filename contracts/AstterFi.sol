@@ -32,8 +32,12 @@ contract AstterFi {
   mapping(address => uint) credit_limit;
   mapping(address => uint) borrowed;
   mapping(string => uint) treasury;
-  mapping(address => bool) registeredUser;
+  //mapping(address => bool) registeredUser;
   mapping(address => uint) deposit;
+  mapping(address => mapping(uint => uint)) repayment;
+  mapping(address => mapping(uint => bool)) repaymentStatus;
+  mapping(address => bool) hasBorrowed;
+  mapping(address => mapping(uint => uint)) repayAmount;
 
   event CreditLimitIncreased(address indexed user, uint indexed newLimit);
   event CreditTrasnfered(uint indexed transferId, address indexed seller, address indexed borrower, uint amount);
@@ -46,10 +50,9 @@ contract AstterFi {
   constructor() {
     owner = msg.sender;
     regNo = 0;
-    treasury["USDT"] = 0;
+    treasury["USDT"] = 1000000000;
     treasury["MATIC"] = 0;
     pf = PriceConverter(0x868DF7B30D931Bf0a48755C9D94d0e4618a25cf2);
-    //USDT = IERC20();
   }
 
   fallback() external{}
@@ -68,13 +71,34 @@ contract AstterFi {
       interestRate = rate;
   } 
 
+  function setTokenAddress(address _addr) external {
+     USDT = IERC20(_addr);
+  }
+
   function approveBorrow(address seller, uint amount) external {
-      require(amount < (credit_limit[msg.sender] - borrowed[msg.sender]), "Exceeded Credit Limit");
-      require(registeredUser[seller] == true, "Seller not registered");
-      require(registeredUser[msg.sender] == true, "User not registered");
+      require(hasBorrowed[msg.sender] != true, "User has an existing credit usage");
+      require(amount < credit_limit[msg.sender], "Exceeded Credit Limit");
 
       borrowed[msg.sender] = borrowed[msg.sender].add(amount);
       treasury["USDT"] = treasury["USDT"].sub(amount);
+
+      hasBorrowed[msg.sender] = true;
+
+      //0x83EFDd0E859412c4Ba4E383EA3A9DA09f909F2fC
+
+      uint installment = amount.div(3);
+
+      repayAmount[msg.sender][0] = installment;
+      repayAmount[msg.sender][1] = installment;
+      repayAmount[msg.sender][2] = installment;
+
+      repayment[msg.sender][0] = block.timestamp + 30 days;
+      repayment[msg.sender][1] = block.timestamp + 60 days;
+      repayment[msg.sender][2] = block.timestamp + 90 days;
+
+      repaymentStatus[msg.sender][0] = false;
+      repaymentStatus[msg.sender][1] = false;
+      repaymentStatus[msg.sender][2] = false;
 
       USDT.transfer(seller, amount);
   }
@@ -88,11 +112,27 @@ contract AstterFi {
   }
 
   function withdrawDeposit() external {
+    require(deposit[msg.sender] != 0, "User does not have any deposit"); 
     require(borrowed[msg.sender] == 0, "Amount borrowed yet to be repayed");
     //require(registeredUser[msg.sender] == true, "User must be registered to withdraw funds");
+    uint transferAmt = deposit[msg.sender];
+    deposit[msg.sender] = 0;
     credit_limit[msg.sender] = 0;
 
-    msg.sender.call{value: deposit[msg.sender]}("");
+    msg.sender.call{value: transferAmt}("");
   }
   //1% per month
+
+  function getDeadline() external view returns(uint[3] memory) {
+      uint[3] memory deadline = [repayment[msg.sender][0], repayment[msg.sender][1], repayment[msg.sender][2]];
+      return deadline;
+  }
+
+  function DeadlineStatus(uint n) external view returns(bool) {
+      return repaymentStatus[msg.sender][n];
+  }
+
+  function repay(uint n) external payable {
+      USDT.transferFrom(msg.sender, address(this), repayAmount[msg.sender][n]);
+  }
 }
