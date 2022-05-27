@@ -50,7 +50,7 @@ contract AstterFi {
   constructor() {
     owner = msg.sender;
     regNo = 0;
-    treasury["USDT"] = 1000000000;
+    treasury["USDT"] = 1000;
     treasury["MATIC"] = 0;
     pf = PriceConverter(0x868DF7B30D931Bf0a48755C9D94d0e4618a25cf2);
   }
@@ -61,7 +61,7 @@ contract AstterFi {
       uint limit = credit_limit[msg.sender];
       uint rate = uint(pf.getDerivedPrice(0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada, 0x0FCAa9c899EC5A91eBc3D5Dd869De833b06fB046, 8));
       limit = limit.add(msg.value.mul(rate));
-      credit_limit[msg.sender] = limit;
+      credit_limit[msg.sender] = limit.div(10 ** 8);
 
       deposit[msg.sender] = deposit[msg.sender].add(msg.value); 
       treasury["MATIC"] = treasury["MATIC"].add(msg.value);
@@ -77,15 +77,13 @@ contract AstterFi {
 
   function approveBorrow(address seller, uint amount) external {
       require(hasBorrowed[msg.sender] != true, "User has an existing credit usage");
-      require(amount < credit_limit[msg.sender], "Exceeded Credit Limit");
+      require(amount.mul(10 ** 18) < credit_limit[msg.sender], "Exceeded Credit Limit");
 
       borrowed[msg.sender] = borrowed[msg.sender].add(amount);
       treasury["USDT"] = treasury["USDT"].sub(amount);
 
       hasBorrowed[msg.sender] = true;
-
       //0x83EFDd0E859412c4Ba4E383EA3A9DA09f909F2fC
-
       uint installment = amount.div(3);
 
       repayAmount[msg.sender][0] = installment;
@@ -100,7 +98,7 @@ contract AstterFi {
       repaymentStatus[msg.sender][1] = false;
       repaymentStatus[msg.sender][2] = false;
 
-      USDT.transfer(seller, amount);
+      USDT.transfer(seller, amount * (10 ** 18));
   }
 
   function getLimit() external view returns(uint){
@@ -123,16 +121,37 @@ contract AstterFi {
   }
   //1% per month
 
-  function getDeadline() external view returns(uint[3] memory) {
-      uint[3] memory deadline = [repayment[msg.sender][0], repayment[msg.sender][1], repayment[msg.sender][2]];
+  function getDeadline() external view returns(uint[6] memory) {
+      uint[6] memory deadline = [repayAmount[msg.sender][0], repayment[msg.sender][0],
+      repayAmount[msg.sender][1], repayment[msg.sender][1],
+      repayAmount[msg.sender][2], repayment[msg.sender][2]
+      ];
       return deadline;
   }
 
-  function DeadlineStatus(uint n) external view returns(bool) {
+  function getDeadlineStatus(uint n) external view returns(bool) {
       return repaymentStatus[msg.sender][n];
   }
 
-  function repay(uint n) external payable {
+  function repay(uint n) external{
+      require(repaymentStatus[msg.sender][n] == false, "Installment already paid");
       USDT.transferFrom(msg.sender, address(this), repayAmount[msg.sender][n]);
+
+      repaymentStatus[msg.sender][n] = true;
+      borrowed[msg.sender] = borrowed[msg.sender].sub(repayAmount[msg.sender][n]);
+      if(borrowed[msg.sender] == 0) {
+        hasBorrowed[msg.sender] = false;
+      }
+  }
+
+  function repayFull() external {
+      USDT.transferFrom(msg.sender, address(this), borrowed[msg.sender]);
+
+      repaymentStatus[msg.sender][0] = true;
+      repaymentStatus[msg.sender][1] = true;
+      repaymentStatus[msg.sender][2] = true;
+
+      borrowed[msg.sender] = 0;
+      hasBorrowed[msg.sender] = false;
   }
 }

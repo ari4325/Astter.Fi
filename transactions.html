@@ -16,6 +16,7 @@
 
     <!-- Favicons -->
     <link rel="shortcut icon" href="img/favicon.png" />
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   </head>
 
   <body
@@ -264,6 +265,53 @@
 
           <!-- Grid -->
           <div class="grid grid-cols-1 gap-[1.875rem] md:grid-cols-2 lg:grid-cols-4">
+
+            <article>
+              <div class="swiper-slide">
+                   <article>
+                     <div
+                       class="dark:bg-jacarta-700 dark:border-jacarta-700 border-jacarta-100 rounded-2.5xl block border bg-white p-[1.1875rem] transition-shadow hover:shadow-lg"
+                     >
+                     
+                       <div class="mt-4 flex items-center justify-between">
+                         <a>
+                           <span class="font-display text-jacarta-700 hover:text-accent text-base dark:text-white"
+                             >Payment <span>1/3<span> </span
+                           >
+                         </a>
+                         <span
+                           class="dark:border-jacarta-600 border-jacarta-100 flex items-center whitespace-nowrap rounded-md border py-1 px-2"
+                         >
+                           <span class="text-green text-sm font-medium tracking-tight" id="emi_one"></span><br>
+                         </span>
+                       </div>
+                       <div class="mt-2 text-sm">
+                        <span class="dark:text-jacarta-300">Payable by:</span><br>
+                        <span class="dark:text-jacarta-100 text-jacarta-700" id="first_date"></span>
+                       </div>
+ 
+                       <div class="mt-8 flex items-center justify-between">
+                        <a href="details.html?id=1"> <button
+                           type="button"
+                           class="text-accent font-display text-sm font-semibold"
+                         >
+                           View details
+                         </button></a>
+ 
+                         <div class="flex items-center space-x-1">
+                           <span
+                             class="js-likes relative cursor-pointer before:absolute before:h-4 before:w-4 before:bg-[url('../img/heart-fill.svg')] before:bg-cover before:bg-center before:bg-no-repeat before:opacity-0"
+                             data-tippy-content="Favorite"
+                           >
+                             
+                           </span>
+                         </div>
+                       </div>
+                     </div>
+                   </article>
+                 </div>
+             </article>
+
             <article>
              <div class="swiper-slide">
                   <article>
@@ -280,16 +328,16 @@
                         <span
                           class="dark:border-jacarta-600 border-jacarta-100 flex items-center whitespace-nowrap rounded-md border py-1 px-2"
                         >
-                          <span class="text-green text-sm font-medium tracking-tight">200 USDT</span><br>
+                          <span class="text-green text-sm font-medium tracking-tight" id="emi_two"></span><br>
                         </span>
                       </div>
                       <div class="mt-2 text-sm">
-                        <span class="dark:text-jacarta-300">Paying to:</span><br>
-                        <span class="dark:text-jacarta-100 text-jacarta-700">wallet id here (shortend)</span>
+                        <span class="dark:text-jacarta-300">Payable by:</span><br>
+                        <span class="dark:text-jacarta-100 text-jacarta-700" id="second_date"></span>
                       </div>
 
                       <div class="mt-8 flex items-center justify-between">
-                       <a href="details.html"> <button
+                       <a href="details.html?id=2"> <button
                           type="button"
                           class="text-accent font-display text-sm font-semibold"
                         >
@@ -326,16 +374,16 @@
                         <span
                           class="dark:border-jacarta-600 border-jacarta-100 flex items-center whitespace-nowrap rounded-md border py-1 px-2"
                         >
-                          <span class="text-green text-sm font-medium tracking-tight">500 USDT</span><br>
+                          <span class="text-green text-sm font-medium tracking-tight" id="emi_three"></span><br>
                         </span>
                       </div>
                       <div class="mt-2 text-sm">
-                        <span class="dark:text-jacarta-300">Paying to:</span><br>
-                        <span class="dark:text-jacarta-100 text-jacarta-700">wallet id here (shortend)</span>
+                        <span class="dark:text-jacarta-300">Payable by:</span><br>
+                        <span class="dark:text-jacarta-100 text-jacarta-700" id="third_date"></span>
                       </div>
 
                       <div class="mt-8 flex items-center justify-between">
-                       <a href="details.html"> <button
+                       <a href="details.html?id=3"> <button
                           type="button"
                           class="text-accent font-display text-sm font-semibold"
                         >
@@ -505,5 +553,53 @@
 
     <!-- JS Scripts -->
     <script src="./js/app.bundle.js"></script>
+    <script>
+      const contract_address = '0x90e457Cbe6AE69bc7e0C30746f4cF5E759a335dB';
+
+      var astterFiabi, astterFicore;
+      var first_date, second_date, third_date;
+      var emi_one, emi_two, emi_three;
+
+      first_date = document.getElementById('first_date');
+      second_date = document.getElementById('second_date');
+      third_date = document.getElementById('third_date');
+
+      emi_one = document.getElementById('emi_one');
+      emi_two = document.getElementById('emi_two');
+      emi_three = document.getElementById('emi_three');
+
+      async function load() {
+          web3 = new Web3(window.ethereum);
+          accounts = await web3.eth.getAccounts();
+          if(accounts[0] != undefined) {
+              //0x0eE25Ea9CdAEAB823F12d3Ef18C097f413E369D7
+              availableBalance = await web3.eth.getBalance(accounts[0]);
+          }
+
+          await fetch('../build/contracts/AstterFi.json')
+            .then(response => response.json())
+            .then(data => {
+              astterFiabi = data.abi;
+            });
+
+          astterFicore = await new web3.eth.Contract(astterFiabi, contract_address);
+
+          await astterFicore.methods.getDeadline().call({from: accounts[0]})
+          .then(function(result){
+              date1 = new Date(result[1] * 1000);
+              date2 = new Date(result[3] * 1000);
+              date3 = new Date(result[5] * 1000);
+              first_date.innerText = date1.toUTCString().slice(0, 16);
+              second_date.innerText = date2.toUTCString().slice(0, 16);
+              third_date.innerText = date3.toUTCString().slice(0, 16);
+
+              emi_one.innerText = result[0] + " USDT";
+              emi_two.innerText = result[2] + " USDT";
+              emi_three.innerText = result[4] + " USDT";
+          });
+      }
+
+      load();
+    </script>
   </body>
 </html>

@@ -525,7 +525,7 @@
     <script src="./js/app.bundle.js"></script>
     <script src="./js/charts.bundle.js"></script>
     <script>
-        const contract_address = '0xee1dD750B0E0e7F837508158Cafb5C83b5793D0B';
+        const contract_address = '0x90e457Cbe6AE69bc7e0C30746f4cF5E759a335dB';
         var astterFicore, astterFiabi;
         var web3, walletAddress, balance, availableBalance, collateralAddAmount, addCollateralBtn, matic, usdt, withdraw;
         balance = document.getElementById("balance");
@@ -568,7 +568,7 @@
                 console.log(result);
                 limit = result;
             });
-            usdt.innerText = (limit*Math.pow(10, -26)).toFixed(4);
+            usdt.innerText = (limit*Math.pow(10, -18)).toFixed(4);
         }
 
         load();

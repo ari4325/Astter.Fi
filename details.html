@@ -16,6 +16,7 @@
 
     <!-- Favicons -->
     <link rel="shortcut icon" href="img/favicon.png" />
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   </head>
 
   <body
@@ -282,34 +283,13 @@
                 </div>
               </div>
 
-              <h1 class="font-display text-jacarta-700 mb-4 text-4xl font-semibold dark:text-white">Payment 2/3</h1>
-               <span class="text-green text-sm font-medium tracking-tight">Paying to: <span class="dark:text-jacarta-300 text-jacarta-400 text-sm">Wallet ID here (full)</span></span>
+              <h1 class="font-display text-jacarta-700 mb-4 text-4xl font-semibold dark:text-white" id="payment_no">Payment 2/3</h1>
+               <span class="text-green text-sm font-medium tracking-tight">Payable by: <span class="dark:text-jacarta-300 text-jacarta-400 text-sm" id="payment_date"></span></span>
 
               <div class="mb-8 flex items-center space-x-4 whitespace-nowrap">
                  
                  
               </div>
-
-              <p class="dark:text-jacarta-300 mb-10">
-                  <span>1st payment - 500 USDT </span>  <span
-                    class="dark:border-jacarta-600 bg-green inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-white"
-                    data-tippy-content="Verified Collection"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      height="24"
-                      class="h-[.875rem] w-[.875rem] fill-white"
-                    >
-                      <path fill="none" d="M0 0h24v24H0z"></path>
-                      <path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
-                    </svg>
-                  </span><br>
-                  <span>2nd payment - 500 USDT (<span>due date here<span>)</span><br>
-                  <span>3rd payment - 500 USDT (<span>due date here<span>)</span>
-              </p>
-
               
               
               <div
@@ -317,19 +297,15 @@
               >
                
 
-                  <a 
-                  href="#"
-                  data-bs-toggle="modal"
-                  data-bs-target="#placeBidModal"
+                  <button
+                  id="payInstallmentBtn"
                   class="bg-accent shadow-accent-volume hover:bg-accent-dark inline-block w-full rounded-full py-3 px-8 text-center font-semibold text-white transition-all"
-                  >Pay 2nd Payment</a
+                  ></a
                 >
 
 
-                <a style="margin-top:5%;" 
-                  href="#"
-                  data-bs-toggle="modal"
-                  data-bs-target="#placeBidModal"
+                <button style="margin-top:5%;" 
+                  id="payFullBtn"
                   class="bg-accent shadow-accent-volume hover:bg-accent-dark inline-block w-full rounded-full py-3 px-8 text-center font-semibold text-white transition-all"
                   >Pay Full Now</a
                 >
@@ -385,7 +361,7 @@
             </div>
 
             <div class="text-right">
-              <span class="dark:text-jacarta-400 text-sm">Balance: 1000 USDT</span>
+              <span class="dark:text-jacarta-400 text-sm" >Balance: 1000 USDT</span>
             </div>
 
             <!-- Terms -->
@@ -556,5 +532,112 @@
     <script src="./js/countdown.bundle.js"></script>
     <script src="./js/app.bundle.js"></script>
     <script src="./js/charts.bundle.js"></script>
+    <script>
+
+        
+
+      var payment_no, payment_date, payInstallmentBtn, payFullBtn;
+      payment_date = document.getElementById('payment_date');
+      payment_no =  document.getElementById('payment_no');
+      payInstallmentBtn = document.getElementById('payInstallmentBtn');
+      payFullBtn = document.getElementById('payFullBtn');
+
+      const queryString = window.location.search;
+      const parameters = new URLSearchParams(queryString);
+      const value = parameters.get('id');
+      payment_no.innerText = "Payment  " + value+"/3";
+      payInstallmentBtn.innerText = "Pay Installment: " + value;
+
+      var astterFiabi, astterFicore, erc20core, erc20abi, approveFunctionData;
+
+      const contract_address = '0x90e457Cbe6AE69bc7e0C30746f4cF5E759a335dB';
+      const usdt_address = '0xa30c6a94d2D7A435Ae8E038704B7052978ae3C05';
+
+       async function load() {
+
+          web3 = new Web3(window.ethereum);
+          accounts = await web3.eth.getAccounts();
+          if(accounts[0] != undefined) {
+              //0x0eE25Ea9CdAEAB823F12d3Ef18C097f413E369D7
+              availableBalance = await web3.eth.getBalance(accounts[0]);
+          }
+
+          await fetch('../build/contracts/AstterFi.json')
+            .then(response => response.json())
+            .then(data => {
+              astterFiabi = data.abi;
+            });
+
+          astterFicore = await new web3.eth.Contract(astterFiabi, contract_address);
+
+          await fetch('../build/contracts/ERC20.json')
+            .then(response => response.json())
+            .then(data => {
+              erc20abi = data.abi;
+            });
+
+          erc20core = await new web3.eth.Contract(erc20abi, usdt_address);
+
+          await astterFicore.methods.getDeadline().call({from: accounts[0]})
+          .then(async function(result){
+              if(value == 1) {
+                var date = new Date(result[1] * 1000 );
+                payment_date.innerText = date.toUTCString().slice(0, 16);
+                approveFunctionData = await erc20core.methods.approve(contract_address, web3.utils.toWei(result[0]+"", 'ether')).encodeABI();
+              }
+              if(value == 2) {
+                var date = new Date(result[3] * 1000 );
+                payment_date.innerText = date.toUTCString().slice(0, 16);
+                approveFunctionData = await erc20core.methods.approve(contract_address, web3.utils.toWei(result[2]+"", 'ether')).encodeABI();
+              }
+              if(value == 3) {
+                var date = new Date(result[5] * 1000 );
+                payment_date.innerText = date.toUTCString().slice(0, 16);
+                approveFunctionData = await erc20core.methods.approve(contract_address, web3.utils.toWei(result[4]+"", 'ether')).encodeABI();
+              }
+          });
+
+          await astterFicore.methods.getDeadlineStatus(value - 1).call({from: accounts[0]})
+          .then(async function(result) {
+              if(result) {
+                console.log(result);
+                 payment_date.innerText = "PAID";
+                 payFullBtn.disabled = true;
+                 payFullBtn.innerText = "";
+                 payInstallmentBtn.disabled = true;
+                 payInstallmentBtn.innerText = "";
+              }
+          });
+      }
+
+      load();
+
+      payInstallmentBtn.addEventListener("click", async function() {
+        await web3.eth.sendTransaction({from: accounts[0], to: usdt_address, data: approveFunctionData})
+        .on('transactionHash', function(hash){
+            console.log(hash);
+        })
+        .on('receipt', async function(receipt){
+            console.log(receipt);
+            var functionData = await astterFicore.methods.repay(value - 1).encodeABI();
+            await web3.eth.sendTransaction({from: accounts[0], to: contract_address, data: functionData})
+            .on('transactionHash', function(hash){
+                console.log(hash);
+            })
+            .on('receipt', function(receipt){
+                console.log(receipt);
+                
+            })
+            .on('confirmation', function(confirmationNumber, receipt){ 
+
+              })
+            .on('error', console.error);
+        })
+        .on('confirmation', function(confirmationNumber, receipt){ 
+
+          })
+        .on('error', console.error);
+      })
+    </script>
   </body>
 </html>
