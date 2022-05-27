@@ -16,6 +16,7 @@
 
     <!-- Favicons -->
     <link rel="shortcut icon" href="img/favicon.png" />
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   </head>
 
   <body
@@ -252,7 +253,7 @@
           <div class="text-center">
             <h2 class="font-display text-jacarta-700 mb-2 text-4xl font-medium dark:text-white">DASHBOARD</h2>
             <div class="mb-8">
-              <span class="text-jacarta-400 text-sm font-bold">wallet id goes here</span>
+              <span class="text-jacarta-400 text-sm font-bold" id="walletAddress">wallet id goes here</span>
             </div>
 
             <div
@@ -267,16 +268,16 @@
                   class="text-jacarta-700 mb-1 flex items-center justify-center text-base font-medium dark:text-white"
                 >
                   
-                  <span class="font-bold">2.55865</span>
+                  <span class="font-bold" id="matic"></span>
                 </div>
-                <div class="text-2xs dark:text-jacarta-400 font-medium tracking-tight">ETH Collateral</div>
+                <div class="text-2xs dark:text-jacarta-400 font-medium tracking-tight">MATIC Collateral</div>
               </a>
               <a href="#" class="border-jacarta-100 w-1/2 rounded-r-xl py-4 hover:shadow-md sm:w-32">
                 <div
                   class="text-jacarta-700 mb-1 flex items-center justify-center text-base font-medium dark:text-white"
                 >
                  
-                  <span class="font-bold">17000</span>
+                  <span class="font-bold" id="usdt"></span>
                 </div>
                 <div class="text-2xs dark:text-jacarta-400 font-medium tracking-tight">USDT Limit</div>
               </a>
@@ -289,6 +290,14 @@
                   data-bs-target="#placeBidModal"
                   class="bg-accent shadow-accent-volume hover:bg-accent-dark inline-block rounded-full py-3 px-8 text-center font-semibold text-white transition-all"
                   >Add more collateral</a
+                >
+            </p>
+
+            <p class="dark:text-jacarta-300 mx-auto max-w-xl text-lg">
+              <a 
+                  href="#"
+                  class="bg-accent shadow-accent-volume hover:bg-accent-dark inline-block rounded-full py-3 px-8 text-center font-semibold text-white transition-all"
+                  >Withdraw deposit</a
                 >
             </p>
 
@@ -330,7 +339,7 @@
             >
               <div class="border-jacarta-100 bg-jacarta-50 flex flex-1 items-center self-stretch border-r px-2">
                 
-                <span style="margin-left: 5%" class="font-display text-jacarta-700 text-sm">ETH</span>
+                <span style="margin-left: 5%" class="font-display text-jacarta-700 text-sm">MATIC</span>
               </div>
 
               <input
@@ -338,13 +347,14 @@
                 class="focus:ring-accent h-12 w-full flex-[3] border-0 focus:ring-inset"
                 placeholder="Amount"
                 value=""
+                id="collateralAddAmount"
               />
 
               
             </div>
 
             <div class="text-right">
-              <span class="dark:text-jacarta-400 text-sm">Balance: 5 ETH</span>
+              <span class="dark:text-jacarta-400 text-sm" id="balance">Balance: 5 ETH</span>
             </div>
  <!-- Terms -->
             <div class="mt-4 flex items-center space-x-2">
@@ -357,6 +367,7 @@
             <div class="flex items-center justify-center space-x-4">
               <button
                 type="button"
+                id="addCollateralBtn"
                 class="bg-accent shadow-accent-volume hover:bg-accent-dark rounded-full py-3 px-8 text-center font-semibold text-white transition-all"
               >
                 Add collateral
@@ -512,5 +523,72 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <script src="./js/app.bundle.js"></script>
     <script src="./js/charts.bundle.js"></script>
+    <script>
+        var astterFicore, astterFiabi;
+        var web3, walletAddress, balance, availableBalance, collateralAddAmount, addCollateralBtn, matic, usdt;
+        balance = document.getElementById("balance");
+        walletAddress = document.getElementById("walletAddress");
+        addCollateralBtn = document.getElementById("addCollateralBtn");
+        collateralAddAmount = document.getElementById("collateralAddAmount");
+        matic = document.getElementById('matic');
+        usdt = document.getElementById('usdt');
+        async function load() {
+              web3 = new Web3(window.ethereum);
+              accounts = await web3.eth.getAccounts();
+              if(accounts[0] != undefined) {
+                 //0x0eE25Ea9CdAEAB823F12d3Ef18C097f413E369D7
+                 walletAddress.innerText = accounts[0];
+                 availableBalance = await web3.eth.getBalance(accounts[0]);
+                 balance.innerText = 'balance: ' + (availableBalance * Math.pow(10, -18)) + " MATIC";
+              }
+
+              await fetch('../build/contracts/AstterFi.json')
+               .then(response => response.json())
+               .then(data => {
+                  astterFiabi = data.abi;
+                });
+
+              astterFicore = new web3.eth.Contract(astterFiabi, '0x0B850E5cBD546F86717E4491be44a4CFc051D6b8');
+              updateUI();
+        }
+
+        async function updateUI() {
+          var deposit, limit;
+            await astterFicore.methods.getDeposit().call({from: accounts[0]})
+            .then(function(result){
+                console.log(result);
+                deposit = result;
+            });
+            matic.innerText = deposit*Math.pow(10, -18);
+            await astterFicore.methods.getLimit().call({from: accounts[0]})
+            .then(function(result){
+                console.log(result);
+                limit = result;
+            });
+            usdt.innerText = (limit*Math.pow(10, -26)).toFixed(4);
+        }
+
+        load();
+
+        addCollateralBtn.addEventListener("click", async () => {
+          web3.eth.sendTransaction({
+              from: accounts[0],
+              to: '0x0B850E5cBD546F86717E4491be44a4CFc051D6b8',
+              value: collateralAddAmount.value * Math.pow(10, 18)
+          })
+          .on('transactionHash', function(hash){
+              console.log(hash);
+          })
+          .on('receipt', function(receipt){
+              console.log(receipt);
+          })
+          .on('confirmation', function(confirmationNumber, receipt){ 
+
+           })
+          .on('error', console.error);
+          })
+
+         
+    </script>
   </body>
 </html>
